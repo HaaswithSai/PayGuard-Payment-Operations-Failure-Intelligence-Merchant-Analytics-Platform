@@ -1,9 +1,18 @@
+const mongoose = require('mongoose');
 const { Payment, FailureClassification, Merchant, AuditLog } = require('../models');
 const { REPORT_TYPES, PAYMENT_STATUS } = require('../constants/enums');
 const { parseDateRange, calculatePercentage } = require('../utils/analytics.utils');
 const { jsonToCsv } = require('../utils/csv.utils');
 const { jsonToExcelBuffer } = require('../utils/xlsx.utils');
 const AppError = require('../utils/AppError');
+
+const toObjectId = (id) => {
+  if (!id) return null;
+  if (mongoose.Types.ObjectId.isValid(id)) {
+    return new mongoose.Types.ObjectId(id);
+  }
+  return id;
+};
 
 /**
  * Service: Report Data Aggregator and Format Serializer
@@ -138,7 +147,7 @@ class ReportBuilderService {
       status: PAYMENT_STATUS.FAILED,
       createdAt: { $gte: start, $lte: end },
     };
-    if (filters.merchantId) match.merchant = filters.merchantId;
+    if (filters.merchantId) match.merchant = toObjectId(filters.merchantId);
     if (filters.gateway) match.gateway = filters.gateway.toUpperCase();
 
     const limit = Math.min(10000, parseInt(filters.limit, 10) || 5000);
@@ -203,7 +212,7 @@ class ReportBuilderService {
   // 3. Merchant Reconciliation Report Builder
   async buildMerchantReconciliation(filters, start, end) {
     const match = { createdAt: { $gte: start, $lte: end } };
-    if (filters.merchantId) match.merchant = filters.merchantId;
+    if (filters.merchantId) match.merchant = toObjectId(filters.merchantId);
 
     const data = await Payment.aggregate([
       { $match: match },
@@ -261,7 +270,7 @@ class ReportBuilderService {
   // 4. Gateway Performance Report Builder
   async buildGatewayPerformance(filters, start, end) {
     const match = { createdAt: { $gte: start, $lte: end } };
-    if (filters.merchantId) match.merchant = filters.merchantId;
+    if (filters.merchantId) match.merchant = toObjectId(filters.merchantId);
 
     const data = await Payment.aggregate([
       { $match: match },
