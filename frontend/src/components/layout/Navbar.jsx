@@ -1,22 +1,27 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { ShieldCheck, LogOut, Bell, User, Sparkles, Activity, Menu } from 'lucide-react';
+import { ShieldCheck, LogOut, Bell, User, Sparkles, Activity, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 
-export const Navbar = ({ onToggleSidebar }) => {
+export const Navbar = ({ isSidebarOpen, onToggleSidebar }) => {
   const { user, logout, isAdmin, isSupport, isMerchant } = useAuth();
 
   return (
     <header className="glass-nav sticky top-0 z-30 h-16 px-4 sm:px-6 flex items-center justify-between">
       {/* Left: Branding & Status Indicator */}
       <div className="flex items-center gap-2.5 sm:gap-3">
-        {/* Mobile Hamburger Toggle */}
+        {/* Toggle Sidebar Button (Laptop, Tablet & Phone) */}
         <button
           onClick={onToggleSidebar}
-          className="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 border border-white/10 md:hidden transition-colors"
-          aria-label="Toggle Navigation Menu"
+          className="p-2 rounded-xl text-slate-300 hover:text-cyan-300 hover:bg-cyan-500/10 border border-white/10 hover:border-cyan-500/30 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+          title={isSidebarOpen ? 'Close / Hide Sidebar' : 'Open / Show Sidebar'}
+          aria-label="Toggle Sidebar"
         >
-          <Menu className="w-5 h-5" />
+          {isSidebarOpen ? (
+            <PanelLeftClose className="w-5 h-5" />
+          ) : (
+            <PanelLeftOpen className="w-5 h-5 text-cyan-400" />
+          )}
         </button>
 
         <div className="flex items-center gap-2">

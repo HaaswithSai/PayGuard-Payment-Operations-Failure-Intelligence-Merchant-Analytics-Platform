@@ -11,6 +11,7 @@ import {
   Settings,
   Shield,
   Layers,
+  ChevronLeft,
   X,
 } from 'lucide-react';
 
@@ -66,8 +67,10 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
   return (
     <aside
-      className={`fixed md:sticky top-0 left-0 z-50 md:z-auto h-screen w-64 glass-panel border-r border-white/10 flex flex-col justify-between shrink-0 transition-transform duration-300 ease-in-out ${
-        isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      className={`fixed md:sticky top-0 left-0 z-50 h-screen glass-panel border-r border-white/10 flex flex-col justify-between shrink-0 transition-all duration-300 ease-in-out ${
+        isOpen
+          ? 'w-64 translate-x-0 opacity-100'
+          : '-translate-x-full opacity-0 pointer-events-none md:w-0 md:border-r-0 md:p-0 md:overflow-hidden'
       }`}
     >
       {/* Brand Header */}
@@ -90,13 +93,15 @@ export const Sidebar = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          {/* Close button for Mobile */}
+          {/* Close/Collapse Button (Desktop & Mobile) */}
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 md:hidden transition-colors"
-            aria-label="Close Navigation"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            title="Collapse / Hide Sidebar"
+            aria-label="Collapse Navigation"
           >
-            <X className="w-5 h-5" />
+            <ChevronLeft className="w-5 h-5 hidden md:block" />
+            <X className="w-5 h-5 md:hidden" />
           </button>
         </div>
 
