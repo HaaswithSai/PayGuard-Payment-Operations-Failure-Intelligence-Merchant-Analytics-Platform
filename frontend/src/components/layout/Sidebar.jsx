@@ -11,9 +11,10 @@ import {
   Settings,
   Shield,
   Layers,
+  X,
 } from 'lucide-react';
 
-export const Sidebar = () => {
+export const Sidebar = ({ isOpen, onClose }) => {
   const { user, isAdmin, isSupport, isMerchant } = useAuth();
 
   const navItems = [
@@ -64,24 +65,39 @@ export const Sidebar = () => {
   const allowedNav = navItems.filter((item) => !item.roles || item.roles.includes(user?.role));
 
   return (
-    <aside className="w-64 glass-panel border-r border-white/10 flex flex-col justify-between shrink-0 min-h-screen">
+    <aside
+      className={`fixed md:sticky top-0 left-0 z-50 md:z-auto h-screen w-64 glass-panel border-r border-white/10 flex flex-col justify-between shrink-0 transition-transform duration-300 ease-in-out ${
+        isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      }`}
+    >
       {/* Brand Header */}
       <div>
-        <div className="h-16 px-6 flex items-center gap-3 border-b border-white/10">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/25 border border-white/20">
-            <Shield className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="font-bold text-base tracking-tight text-white flex items-center gap-1.5">
-              PayGuard
-              <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
-                v1.0
-              </span>
+        <div className="h-16 px-5 sm:px-6 flex items-center justify-between border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/25 border border-white/20">
+              <Shield className="w-5 h-5" />
             </div>
-            <div className="text-[10px] text-slate-400 font-medium tracking-wide uppercase">
-              Operations & Insights
+            <div>
+              <div className="font-bold text-base tracking-tight text-white flex items-center gap-1.5">
+                PayGuard
+                <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                  v1.0
+                </span>
+              </div>
+              <div className="text-[10px] text-slate-400 font-medium tracking-wide uppercase">
+                Operations & Insights
+              </div>
             </div>
           </div>
+
+          {/* Close button for Mobile */}
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 md:hidden transition-colors"
+            aria-label="Close Navigation"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Nav Links */}
@@ -95,6 +111,7 @@ export const Sidebar = () => {
               <NavLink
                 key={item.path}
                 to={item.path}
+                onClick={onClose}
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
                     isActive

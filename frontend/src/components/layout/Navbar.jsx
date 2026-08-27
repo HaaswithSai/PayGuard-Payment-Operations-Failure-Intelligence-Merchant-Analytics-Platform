@@ -1,15 +1,24 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { ShieldCheck, LogOut, Bell, User, Sparkles, Activity } from 'lucide-react';
+import { ShieldCheck, LogOut, Bell, User, Sparkles, Activity, Menu } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 
-export const Navbar = () => {
+export const Navbar = ({ onToggleSidebar }) => {
   const { user, logout, isAdmin, isSupport, isMerchant } = useAuth();
 
   return (
-    <header className="glass-nav sticky top-0 z-30 h-16 px-6 flex items-center justify-between">
+    <header className="glass-nav sticky top-0 z-30 h-16 px-4 sm:px-6 flex items-center justify-between">
       {/* Left: Branding & Status Indicator */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5 sm:gap-3">
+        {/* Mobile Hamburger Toggle */}
+        <button
+          onClick={onToggleSidebar}
+          className="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 border border-white/10 md:hidden transition-colors"
+          aria-label="Toggle Navigation Menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+
         <div className="flex items-center gap-2">
           <span className="relative flex h-2.5 w-2.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -20,12 +29,12 @@ export const Navbar = () => {
           </span>
         </div>
 
-        <div className="h-4 w-px bg-white/10 mx-2 hidden sm:block" />
+        <div className="h-4 w-px bg-white/10 mx-1 hidden sm:block" />
 
         {isMerchant && user?.merchant && (
           <div className="flex items-center gap-1.5 bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 rounded-lg">
-            <Activity className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="text-xs font-medium text-cyan-300">
+            <Activity className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+            <span className="text-xs font-medium text-cyan-300 truncate max-w-[140px] sm:max-w-none">
               Merchant: <strong className="text-white">{user.merchant.name || user.merchant.merchantCode || 'Active Tenant'}</strong>
             </span>
           </div>
