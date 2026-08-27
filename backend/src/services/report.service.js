@@ -27,7 +27,10 @@ class ReportService {
       if (!actorUser.merchant) {
         throw new AppError('No merchant profile associated with this account', 403, 'MERCHANT_UNASSIGNED');
       }
-      filtersUsed.merchantId = actorUser.merchant.toString();
+      const rawMerchantId = actorUser.merchant._id
+        ? actorUser.merchant._id.toString()
+        : actorUser.merchant.toString();
+      filtersUsed.merchantId = rawMerchantId;
     }
 
     // 2. Validate Enums

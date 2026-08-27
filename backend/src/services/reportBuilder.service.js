@@ -100,7 +100,7 @@ class ReportBuilderService {
   // 1. Transaction Summary Report Builder
   async buildTransactionSummary(filters, start, end) {
     const query = { createdAt: { $gte: start, $lte: end } };
-    if (filters.merchantId) query.merchant = filters.merchantId;
+    if (filters.merchantId) query.merchant = toObjectId(filters.merchantId);
     if (filters.gateway) query.gateway = filters.gateway.toUpperCase();
     if (filters.status) query.status = filters.status.toUpperCase();
 
