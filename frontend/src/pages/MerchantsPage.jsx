@@ -10,6 +10,7 @@ import {
   Eye,
   Check,
   ShieldAlert,
+  Trash2,
 } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
@@ -114,6 +115,24 @@ export const MerchantsPage = () => {
       fetchMerchants();
     } catch (err) {
       alert(`Failed to update status: ${err.message}`);
+    }
+  };
+
+  const handleDeleteMerchant = async (merchant) => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete '${merchant.name}' (${merchant.merchantCode})?\n\nThis will remove the tenant from your roster and cease all payment routing.`
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await merchantsApi.deleteMerchant(merchant._id);
+      if (selectedMerchant && selectedMerchant._id === merchant._id) {
+        setIsDetailsOpen(false);
+        setSelectedMerchant(null);
+      }
+      fetchMerchants();
+    } catch (err) {
+      alert(`Failed to delete merchant: ${err.message}`);
     }
   };
 
@@ -234,7 +253,7 @@ export const MerchantsPage = () => {
                 </Button>
 
                 {isAdmin && (
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5">
                     <select
                       value={merchant.status}
                       onChange={(e) => handleUpdateStatus(merchant._id, e.target.value)}
@@ -250,6 +269,15 @@ export const MerchantsPage = () => {
                       <option value="INACTIVE" className="bg-slate-900 text-white">Inactive</option>
                       <option value="SUSPENDED" className="bg-slate-900 text-white">Suspend</option>
                     </select>
+
+                    <button
+                      type="button"
+                      title="Delete Merchant"
+                      onClick={() => handleDeleteMerchant(merchant)}
+                      className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 hover:border-rose-500/40 transition-all"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 )}
               </div>
@@ -341,6 +369,21 @@ export const MerchantsPage = () => {
                 {selectedMerchant.configuration?.webhookSecret || 'whsec_simulated_test_secret_123'}
               </div>
             </div>
+
+            {isAdmin && (
+              <div className="pt-3 border-t border-white/10 flex justify-between items-center">
+                <span className="text-slate-400 text-[11px]">Danger Zone:</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDeleteMerchant(selectedMerchant)}
+                  icon={Trash2}
+                  className="border-rose-500/30 text-rose-400 hover:bg-rose-500/10"
+                >
+                  Delete Merchant Account
+                </Button>
+              </div>
+            )}
           </div>
         </Modal>
       )}
