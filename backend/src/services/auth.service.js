@@ -129,7 +129,7 @@ const changePassword = async ({ userId, currentPassword, newPassword }) => {
   const user = await User.findOne({ _id: userId, isDeleted: false }).select('+passwordHash');
 
   if (!user) {
-    throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    throw new AppError('User found', 404, 'USER_NOT_FOUND');
   }
 
   // 2. Verify current password
@@ -151,6 +151,12 @@ const changePassword = async ({ userId, currentPassword, newPassword }) => {
     email: user.email,
     merchant: user.merchant,
   });
+
+  return {
+    user: user.toJSON(),
+    token,
+  };
+};
 
 /**
  * Service: Public Self-Service Merchant Registration
@@ -233,4 +239,3 @@ module.exports = {
   getUserProfile,
   changePassword,
 };
-
