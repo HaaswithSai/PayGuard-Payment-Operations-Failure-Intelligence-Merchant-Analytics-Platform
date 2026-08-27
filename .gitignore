@@ -1,0 +1,34 @@
+# Node Dependencies & Builds
+node_modules/
+dist/
+build/
+.next/
+
+# Environment variables & secrets
+.env
+.env.local
+.env.production
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Python & ML Artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+venv/
+.venv/
+env/
+
+# OS & IDE Metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

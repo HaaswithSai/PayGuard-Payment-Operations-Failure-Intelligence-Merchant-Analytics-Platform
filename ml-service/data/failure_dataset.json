@@ -1,0 +1,67 @@
+[
+  {"text": "card_declined_insufficient_funds", "category": "INSUFFICIENT_FUNDS", "iso_code": "51"},
+  {"text": "insufficient funds in customer bank account", "category": "INSUFFICIENT_FUNDS", "iso_code": "51"},
+  {"text": "not sufficient funds nsf 51", "category": "INSUFFICIENT_FUNDS", "iso_code": "51"},
+  {"text": "low balance decline from issuer bank", "category": "INSUFFICIENT_FUNDS", "iso_code": "51"},
+  {"text": "account balance below payment total", "category": "INSUFFICIENT_FUNDS", "iso_code": "51"},
+  {"text": "declined 51 insufficient funds", "category": "INSUFFICIENT_FUNDS", "iso_code": "51"},
+  {"text": "funds unavailable for debit", "category": "INSUFFICIENT_FUNDS", "iso_code": "51"},
+  {"text": "insufficient credit line balance", "category": "INSUFFICIENT_FUNDS", "iso_code": "51"},
+
+  {"text": "card_validity_expired_54", "category": "CARD_EXPIRED", "iso_code": "54"},
+  {"text": "card validity has expired", "category": "CARD_EXPIRED", "iso_code": "54"},
+  {"text": "expired card presentation error 54", "category": "CARD_EXPIRED", "iso_code": "54"},
+  {"text": "the expiration month or year is past", "category": "CARD_EXPIRED", "iso_code": "54"},
+  {"text": "card expiry date reached", "category": "CARD_EXPIRED", "iso_code": "54"},
+  {"text": "expired plastic token decline", "category": "CARD_EXPIRED", "iso_code": "54"},
+
+  {"text": "3ds_authentication_failed", "category": "AUTHENTICATION_FAILED", "iso_code": "05"},
+  {"text": "three d secure challenge failure", "category": "AUTHENTICATION_FAILED", "iso_code": "05"},
+  {"text": "do not honor transaction 05", "category": "AUTHENTICATION_FAILED", "iso_code": "05"},
+  {"text": "incorrect cvv security code entered", "category": "AUTHENTICATION_FAILED", "iso_code": "82"},
+  {"text": "pin verification failed 82", "category": "AUTHENTICATION_FAILED", "iso_code": "82"},
+  {"text": "otp mismatch during two factor auth", "category": "AUTHENTICATION_FAILED", "iso_code": "05"},
+  {"text": "customer failed step up authentication", "category": "AUTHENTICATION_FAILED", "iso_code": "05"},
+
+  {"text": "high_risk_fraud_suspected_59", "category": "FRAUD_SUSPECTED", "iso_code": "59"},
+  {"text": "suspected fraudulent transaction", "category": "FRAUD_SUSPECTED", "iso_code": "59"},
+  {"text": "stolen card report flag 59", "category": "FRAUD_SUSPECTED", "iso_code": "59"},
+  {"text": "sanction list screening block", "category": "FRAUD_SUSPECTED", "iso_code": "59"},
+  {"text": "security risk score exceeded threshold", "category": "FRAUD_SUSPECTED", "iso_code": "59"},
+  {"text": "lost card flagged by issuing institution", "category": "FRAUD_SUSPECTED", "iso_code": "59"},
+
+  {"text": "gateway_timeout_upstream_issuer", "category": "NETWORK_TIMEOUT", "iso_code": null},
+  {"text": "connection reset by peer econnreset", "category": "NETWORK_TIMEOUT", "iso_code": null},
+  {"text": "issuer socket timeout 504", "category": "NETWORK_TIMEOUT", "iso_code": null},
+  {"text": "network packet drop upstream bank switch", "category": "NETWORK_TIMEOUT", "iso_code": null},
+  {"text": "payment processor connection timed out", "category": "NETWORK_TIMEOUT", "iso_code": null},
+  {"text": "http 504 gateway timeout waiting for switch response", "category": "NETWORK_TIMEOUT", "iso_code": null},
+
+  {"text": "daily_limit_exceeded_61", "category": "LIMIT_EXCEEDED", "iso_code": "61"},
+  {"text": "card velocity frequency limit breached 65", "category": "LIMIT_EXCEEDED", "iso_code": "65"},
+  {"text": "transaction exceeds per transaction limit", "category": "LIMIT_EXCEEDED", "iso_code": "61"},
+  {"text": "maximum withdrawal volume breached", "category": "LIMIT_EXCEEDED", "iso_code": "61"},
+  {"text": "daily spending quota exceeded on card", "category": "LIMIT_EXCEEDED", "iso_code": "61"},
+
+  {"text": "invalid_card_number_14", "category": "INVALID_DETAILS", "iso_code": "14"},
+  {"text": "luhn algorithm checksum check failed", "category": "INVALID_DETAILS", "iso_code": "14"},
+  {"text": "invalid routing number or iban 57", "category": "INVALID_DETAILS", "iso_code": "57"},
+  {"text": "card number length incorrect for bin", "category": "INVALID_DETAILS", "iso_code": "14"},
+  {"text": "unsupported card brand prefix", "category": "INVALID_DETAILS", "iso_code": "14"},
+
+  {"text": "gateway_unavailable_502_bad_gateway", "category": "GATEWAY_ERROR", "iso_code": null},
+  {"text": "processor rejected request format", "category": "GATEWAY_ERROR", "iso_code": null},
+  {"text": "payment gateway undergoing maintenance", "category": "GATEWAY_ERROR", "iso_code": null},
+  {"text": "gateway endpoint returned invalid json payload", "category": "GATEWAY_ERROR", "iso_code": null},
+
+  {"text": "system_error_issuer_malfunction_96", "category": "SYSTEM_ERROR", "iso_code": "96"},
+  {"text": "switch inoperative bank error 91", "category": "SYSTEM_ERROR", "iso_code": "91"},
+  {"text": "database cluster failure on issuer host", "category": "SYSTEM_ERROR", "iso_code": "96"},
+  {"text": "internal switch error 500", "category": "SYSTEM_ERROR", "iso_code": "96"},
+  {"text": "issuer processor core crash", "category": "SYSTEM_ERROR", "iso_code": "96"},
+
+  {"text": "unspecified bank decline reason", "category": "OTHERS", "iso_code": null},
+  {"text": "contact card issuing bank for details", "category": "OTHERS", "iso_code": null},
+  {"text": "custom rejection code from local provider", "category": "OTHERS", "iso_code": null},
+  {"text": "transaction cannot be completed as requested", "category": "OTHERS", "iso_code": null}
+]
