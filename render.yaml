@@ -1,0 +1,51 @@
+services:
+  # ----------------------------------------------------------------------------
+  # 1. PayGuard Backend Core API (Node.js)
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: payguard-api
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: MONGODB_URI
+        sync: false # Set in Render Dashboard with your MongoDB Atlas URI
+      - key: JWT_SECRET
+        generateValue: true # Render automatically generates a secure 32-char secret
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: ML_SERVICE_URL
+        fromService:
+          name: payguard-ml
+          type: web
+          property: host
+      - key: ML_SERVICE_TIMEOUT_MS
+        value: 2000
+      - key: LOG_LEVEL
+        value: info
+
+  # ----------------------------------------------------------------------------
+  # 2. PayGuard AI & Failure Classification Microservice (Python)
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: payguard-ml
+    env: python
+    plan: free
+    rootDir: ml-service
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ML_HOST
+        value: 0.0.0.0
+      - key: ML_PORT
+        value: 8000
+      - key: LOG_LEVEL
+        value: INFO
