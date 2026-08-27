@@ -27,7 +27,7 @@ export const Sidebar = () => {
       name: 'Merchants',
       path: '/merchants',
       icon: Store,
-      roles: ['ADMIN', 'SUPPORT', 'MERCHANT'],
+      roles: ['ADMIN', 'SUPPORT'],
     },
     {
       name: 'Payments Ledger',

@@ -90,11 +90,67 @@ export const SettingsPage = () => {
           <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
             <span className="text-slate-400">Assigned Tenant</span>
             <p className="text-sm font-semibold text-cyan-300">
-              {isMerchant && user?.merchant ? user.merchant.name : 'Global Platform Scope'}
+              {isMerchant && user?.merchant ? `${user.merchant.name} (${user.merchant.merchantCode})` : 'Global Platform Scope'}
             </p>
           </div>
         </div>
       </Card>
+
+      {/* Merchant-Specific Webhook & Gateway Settings (Merchant Role Only) */}
+      {isMerchant && (
+        <Card
+          title="Merchant Business & Webhook Credentials"
+          subtitle="Your enterprise tenant routing rules, active gateway credentials, and signing secrets"
+          icon={Store}
+        >
+          <div className="space-y-4 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                <span className="text-slate-400 block mb-1">Merchant Code</span>
+                <span className="font-mono text-cyan-300 font-bold text-sm">
+                  {user?.merchant?.merchantCode || 'MCH_TENANT_001'}
+                </span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                <span className="text-slate-400 block mb-1">Settlement Currency</span>
+                <span className="text-white font-bold text-sm">
+                  {user?.merchant?.configuration?.defaultCurrency || 'USD'}
+                </span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                <span className="text-slate-400 block mb-1">Account Status</span>
+                <Badge variant={user?.merchant?.status || 'ACTIVE'} size="sm">
+                  {user?.merchant?.status || 'ACTIVE'}
+                </Badge>
+              </div>
+            </div>
+
+            <div>
+              <span className="text-slate-400 block mb-1.5 font-medium">
+                Active Payment Gateways
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {(user?.merchant?.configuration?.supportedGateways || ['STRIPE', 'RAZORPAY', 'ADYEN', 'PAYPAL']).map((gw) => (
+                  <span key={gw} className="px-2.5 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 font-semibold text-xs">
+                    {gw}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <span className="text-slate-400 block mb-1 font-medium">
+                HMAC-SHA256 Webhook Signing Secret (Use in Stripe / Razorpay / PayPal Webhooks)
+              </span>
+              <div className="p-3 rounded-xl bg-slate-900/80 font-mono text-[11px] text-cyan-300 border border-white/10 break-all select-all">
+                {user?.merchant?.configuration?.webhookSecret || 'whsec_simulated_test_secret_123'}
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Change Password Card */}
       <Card

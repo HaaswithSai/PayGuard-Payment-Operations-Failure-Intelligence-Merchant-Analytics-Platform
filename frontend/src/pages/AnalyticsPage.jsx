@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { analyticsApi } from '../api/analytics.api';
 import {
   BarChart3,
@@ -27,6 +28,7 @@ import {
 } from 'recharts';
 
 export const AnalyticsPage = () => {
+  const { isMerchant } = useAuth();
   const [trends, setTrends] = useState([]);
   const [gateways, setGateways] = useState([]);
   const [banks, setBanks] = useState([]);
@@ -209,47 +211,49 @@ export const AnalyticsPage = () => {
         </Card>
       </div>
 
-      {/* Merchant Performance Leaderboard */}
-      <Card
-        title="Merchant Revenue & Health Leaderboard"
-        subtitle="Performance, transaction counts, and success rates by tenant"
-        icon={Store}
-      >
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="border-b border-white/10 text-slate-400 font-semibold uppercase tracking-wider">
-              <tr>
-                <th className="pb-3 px-3">Merchant Code</th>
-                <th className="pb-3 px-3">Merchant Name</th>
-                <th className="pb-3 px-3">Total Processed</th>
-                <th className="pb-3 px-3">Success Rate</th>
-                <th className="pb-3 px-3">Gross Volume</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {merchants.length === 0 ? (
+      {/* Merchant Performance Leaderboard (Admin & Support Only) */}
+      {!isMerchant && (
+        <Card
+          title="Merchant Revenue & Health Leaderboard"
+          subtitle="Performance, transaction counts, and success rates by tenant"
+          icon={Store}
+        >
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="border-b border-white/10 text-slate-400 font-semibold uppercase tracking-wider">
                 <tr>
-                  <td colSpan={5} className="py-6 text-center text-slate-500">
-                    No merchant transaction data available
-                  </td>
+                  <th className="pb-3 px-3">Merchant Code</th>
+                  <th className="pb-3 px-3">Merchant Name</th>
+                  <th className="pb-3 px-3">Total Processed</th>
+                  <th className="pb-3 px-3">Success Rate</th>
+                  <th className="pb-3 px-3">Gross Volume</th>
                 </tr>
-              ) : (
-                merchants.map((m) => (
-                  <tr key={m.merchantCode} className="hover:bg-white/5">
-                    <td className="py-3 px-3 font-mono font-medium text-cyan-300">{m.merchantCode}</td>
-                    <td className="py-3 px-3 text-white font-medium">{m.name}</td>
-                    <td className="py-3 px-3 text-slate-300">{m.totalPayments}</td>
-                    <td className="py-3 px-3">
-                      <span className="font-semibold text-emerald-400">{m.successRate}%</span>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {merchants.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-6 text-center text-slate-500">
+                      No merchant transaction data available
                     </td>
-                    <td className="py-3 px-3 font-bold text-white">${m.totalVolume?.toFixed(2)}</td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+                ) : (
+                  merchants.map((m) => (
+                    <tr key={m.merchantCode} className="hover:bg-white/5">
+                      <td className="py-3 px-3 font-mono font-medium text-cyan-300">{m.merchantCode}</td>
+                      <td className="py-3 px-3 text-white font-medium">{m.name}</td>
+                      <td className="py-3 px-3 text-slate-300">{m.totalPayments}</td>
+                      <td className="py-3 px-3">
+                        <span className="font-semibold text-emerald-400">{m.successRate}%</span>
+                      </td>
+                      <td className="py-3 px-3 font-bold text-white">${m.totalVolume?.toFixed(2)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
     </div>
   );
 };
