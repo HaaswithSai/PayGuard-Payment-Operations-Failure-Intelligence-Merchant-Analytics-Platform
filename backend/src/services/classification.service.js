@@ -165,6 +165,23 @@ class ClassificationService {
   async listClassifications({ actorUser, query = {} }) {
     const filter = {};
 
+    // Multi-tenant isolation: Scoped to logged-in merchant
+    if (actorUser && actorUser.role === USER_ROLES.MERCHANT) {
+      if (!actorUser.merchant) {
+        return {
+          classifications: [],
+          pagination: { total: 0, page: 1, limit: 20, totalPages: 0, hasNextPage: false, hasPrevPage: false },
+        };
+      }
+      const merchantPayments = await Payment.find({ merchant: actorUser.merchant }).select('_id');
+      const paymentIds = merchantPayments.map((p) => p._id);
+      filter.payment = { $in: paymentIds };
+    } else if (query.merchantId) {
+      const merchantPayments = await Payment.find({ merchant: query.merchantId }).select('_id');
+      const paymentIds = merchantPayments.map((p) => p._id);
+      filter.payment = { $in: paymentIds };
+    }
+
     if (query.category) {
       filter.predictedCategory = query.category.toUpperCase();
     }
@@ -225,6 +242,14 @@ class ClassificationService {
 
     if (!classification) {
       throw new AppError(`Classification for payment '${paymentId}' not found`, 404, 'CLASSIFICATION_NOT_FOUND');
+    }
+
+    // Multi-tenant check
+    if (actorUser && actorUser.role === USER_ROLES.MERCHANT) {
+      const paymentMerchantId = classification.payment?.merchant?._id || classification.payment?.merchant;
+      if (paymentMerchantId && paymentMerchantId.toString() !== actorUser.merchant.toString()) {
+        throw new AppError('Unauthorized access to tenant classification', 403, 'FORBIDDEN');
+      }
     }
 
     return classification;
