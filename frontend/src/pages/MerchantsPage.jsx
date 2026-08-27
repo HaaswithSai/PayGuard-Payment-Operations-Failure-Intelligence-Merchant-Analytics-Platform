@@ -5,13 +5,9 @@ import {
   Store,
   Plus,
   Search,
-  SlidersHorizontal,
   CheckCircle2,
-  AlertCircle,
-  ExternalLink,
-  Shield,
   Eye,
-  Settings,
+  Check,
 } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
@@ -20,8 +16,11 @@ import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
 import { SkeletonLoader, EmptyState } from '../components/ui/EmptyState';
 
+const AVAILABLE_GATEWAYS = ['STRIPE', 'RAZORPAY', 'ADYEN', 'PAYPAL'];
+const AVAILABLE_CURRENCIES = ['USD', 'EUR', 'GBP', 'INR', 'CAD', 'AUD', 'SGD', 'JPY'];
+
 export const MerchantsPage = () => {
-  const { isAdmin, isSupport, isMerchant, user } = useAuth();
+  const { isAdmin } = useAuth();
 
   const [merchants, setMerchants] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +36,8 @@ export const MerchantsPage = () => {
   const [createName, setCreateName] = useState('');
   const [createCode, setCreateCode] = useState('');
   const [createEmail, setCreateEmail] = useState('');
-  const [createGateways, setCreateGateways] = useState(['STRIPE', 'RAZORPAY']);
+  const [createCurrency, setCreateCurrency] = useState('USD');
+  const [createGateways, setCreateGateways] = useState(['STRIPE', 'RAZORPAY', 'ADYEN', 'PAYPAL']);
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState('');
 
@@ -65,6 +65,16 @@ export const MerchantsPage = () => {
     fetchMerchants();
   };
 
+  const toggleGatewaySelection = (gw) => {
+    if (createGateways.includes(gw)) {
+      if (createGateways.length > 1) {
+        setCreateGateways(createGateways.filter((g) => g !== gw));
+      }
+    } else {
+      setCreateGateways([...createGateways, gw]);
+    }
+  };
+
   const handleCreateMerchant = async (e) => {
     e.preventDefault();
     setCreateLoading(true);
@@ -76,13 +86,15 @@ export const MerchantsPage = () => {
         merchantCode: createCode.toUpperCase(),
         contactEmail: createEmail,
         supportedGateways: createGateways,
-        defaultCurrency: 'USD',
+        defaultCurrency: createCurrency,
       });
 
       setIsCreateOpen(false);
       setCreateName('');
       setCreateCode('');
       setCreateEmail('');
+      setCreateCurrency('USD');
+      setCreateGateways(['STRIPE', 'RAZORPAY', 'ADYEN', 'PAYPAL']);
       fetchMerchants();
     } catch (err) {
       setCreateError(err.message || 'Failed to create merchant');
@@ -157,7 +169,7 @@ export const MerchantsPage = () => {
         </form>
       </Card>
 
-      {/* Merchants Grid / Table */}
+      {/* Merchants Grid */}
       {isLoading ? (
         <SkeletonLoader count={4} className="h-20" />
       ) : merchants.length === 0 ? (
@@ -188,14 +200,14 @@ export const MerchantsPage = () => {
                 <div className="mt-4 pt-3 border-t border-white/5 space-y-2 text-xs">
                   <div className="flex items-center justify-between text-slate-400">
                     <span>Default Currency:</span>
-                    <span className="font-semibold text-slate-200">{merchant.configuration?.defaultCurrency || 'USD'}</span>
+                    <span className="font-semibold text-cyan-300">{merchant.configuration?.defaultCurrency || 'USD'}</span>
                   </div>
 
                   <div className="flex items-center justify-between text-slate-400">
-                    <span>Gateways:</span>
-                    <div className="flex gap-1">
+                    <span>Allowed Gateways:</span>
+                    <div className="flex flex-wrap gap-1 justify-end max-w-[180px]">
                       {(merchant.configuration?.supportedGateways || ['STRIPE']).map((gw) => (
-                        <span key={gw} className="text-[10px] font-semibold bg-white/5 px-1.5 py-0.5 rounded text-slate-300">
+                        <span key={gw} className="text-[10px] font-semibold bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 rounded text-cyan-300">
                           {gw}
                         </span>
                       ))}
@@ -258,25 +270,39 @@ export const MerchantsPage = () => {
 
             <div>
               <h4 className="text-xs font-semibold uppercase tracking-wider text-cyan-400 mb-2">
+                Enabled Payment Gateways
+              </h4>
+              <div className="flex flex-wrap gap-2 p-3 rounded-xl bg-white/5 border border-white/10">
+                {(selectedMerchant.configuration?.supportedGateways || ['STRIPE']).map((gw) => (
+                  <span key={gw} className="px-2.5 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 font-semibold text-xs flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5" />
+                    {gw}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-cyan-400 mb-2">
                 Retry & Failover Policy
               </h4>
               <div className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1.5">
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Auto-Retry Enabled:</span>
-                  <span className="text-white font-semibold">
-                    {selectedMerchant.configuration?.retryPolicy?.enabled ? 'Yes' : 'No'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
                   <span className="text-slate-400">Max Auto-Retries:</span>
                   <span className="text-white font-semibold">
-                    {selectedMerchant.configuration?.retryPolicy?.maxRetries || 3}
+                    {selectedMerchant.configuration?.retryPolicy?.maxRetries || 3} attempts
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Backoff Base Delay:</span>
+                  <span className="text-slate-400">Backoff Delay Factor:</span>
                   <span className="text-white font-semibold">
-                    {selectedMerchant.configuration?.retryPolicy?.backoffMs || 1000}ms
+                    {selectedMerchant.configuration?.retryPolicy?.backoffFactorMs || 1000}ms
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Gateway Timeout:</span>
+                  <span className="text-white font-semibold">
+                    {selectedMerchant.configuration?.retryPolicy?.timeoutMs || 5000}ms
                   </span>
                 </div>
               </div>
@@ -287,7 +313,7 @@ export const MerchantsPage = () => {
                 Webhook Notification Secret
               </h4>
               <div className="p-2.5 rounded-xl bg-slate-900/60 font-mono text-[11px] text-cyan-300 border border-white/10 break-all">
-                {selectedMerchant.webhookSecret || 'whsec_payguard_hmac_sha256_mock_secret'}
+                {selectedMerchant.configuration?.webhookSecret || 'whsec_simulated_test_secret_123'}
               </div>
             </div>
           </div>
@@ -299,9 +325,9 @@ export const MerchantsPage = () => {
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
         title="Onboard New Enterprise Merchant"
-        subtitle="Registers a tenant profile with cryptographic webhook secret and routing policies"
+        subtitle="Registers a tenant profile with customizable gateway routing and currency settings"
       >
-        <form onSubmit={handleCreateMerchant} className="space-y-4">
+        <form onSubmit={handleCreateMerchant} className="space-y-4 text-xs">
           {createError && (
             <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
               {createError}
@@ -316,14 +342,31 @@ export const MerchantsPage = () => {
             required
           />
 
-          <Input
-            label="Unique Merchant Code"
-            placeholder="MCH_ACME_001"
-            value={createCode}
-            onChange={(e) => setCreateCode(e.target.value)}
-            helperText="Uppercase alphanumeric identifier"
-            required
-          />
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="Unique Merchant Code"
+              placeholder="MCH_ACME_001"
+              value={createCode}
+              onChange={(e) => setCreateCode(e.target.value)}
+              helperText="Uppercase identifier"
+              required
+            />
+
+            <div>
+              <label className="block text-slate-400 font-medium mb-1">Default Settlement Currency</label>
+              <select
+                value={createCurrency}
+                onChange={(e) => setCreateCurrency(e.target.value)}
+                className="glass-input w-full rounded-xl py-2 px-3 text-white"
+              >
+                {AVAILABLE_CURRENCIES.map((curr) => (
+                  <option key={curr} value={curr} className="bg-slate-900">
+                    {curr}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
           <Input
             label="Billing & Operations Contact Email"
@@ -333,6 +376,36 @@ export const MerchantsPage = () => {
             onChange={(e) => setCreateEmail(e.target.value)}
             required
           />
+
+          {/* Supported Gateways Multi-Select */}
+          <div>
+            <label className="block text-slate-400 font-medium mb-1.5">
+              Allowed Payment Gateways (Click to toggle)
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {AVAILABLE_GATEWAYS.map((gw) => {
+                const isSelected = createGateways.includes(gw);
+                return (
+                  <button
+                    key={gw}
+                    type="button"
+                    onClick={() => toggleGatewaySelection(gw)}
+                    className={`py-2 px-3 rounded-xl border text-xs font-semibold flex items-center justify-between transition-all ${
+                      isSelected
+                        ? 'bg-cyan-500/20 border-cyan-500/40 text-cyan-300 shadow-sm shadow-cyan-500/10'
+                        : 'bg-white/5 border-white/10 text-slate-400 hover:border-white/20'
+                    }`}
+                  >
+                    <span>{gw}</span>
+                    {isSelected && <Check className="w-4 h-4 text-cyan-400" />}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">
+              Selected: {createGateways.join(', ')}
+            </p>
+          </div>
 
           <div className="flex justify-end gap-2 pt-3 border-t border-white/10">
             <Button
@@ -356,3 +429,5 @@ export const MerchantsPage = () => {
     </div>
   );
 };
+
+export default MerchantsPage;
