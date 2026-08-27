@@ -92,6 +92,12 @@ export const DashboardPage = () => {
     fetchDashboardData();
   }, []);
 
+  useEffect(() => {
+    if (isMerchant && user?.merchant?.merchantCode) {
+      setSimMerchantCode(user.merchant.merchantCode);
+    }
+  }, [user, isMerchant]);
+
   const handleMerchantChange = (e) => {
     const newId = e.target.value;
     setSelectedMerchantId(newId);
@@ -109,17 +115,19 @@ export const DashboardPage = () => {
     setSimLoading(true);
     setSimMessage('');
 
+    const targetCode = isMerchant && user?.merchant?.merchantCode ? user.merchant.merchantCode : simMerchantCode;
+
     try {
       const res = await webhooksApi.simulateWebhook({
-        merchantCode: simMerchantCode,
+        merchantCode: targetCode,
         gateway: simGateway,
         status: simStatus,
         amount: parseFloat(simAmount) || 100,
-        currency: 'USD',
+        currency: user?.merchant?.configuration?.defaultCurrency || 'USD',
         rawFailureReason: simStatus === 'FAILED' ? simFailure : null,
       });
 
-      setSimMessage(`Success! Payment ${res.payment?.paymentId || 'created'} ingested for ${simMerchantCode}.`);
+      setSimMessage(`Success! Payment ${res.payment?.paymentId || 'created'} ingested for ${targetCode}.`);
       setTimeout(() => {
         setIsSimulateOpen(false);
         setSimMessage('');
@@ -435,24 +443,33 @@ export const DashboardPage = () => {
           {/* Target Merchant Selector */}
           <div>
             <label className="block text-slate-400 font-medium mb-1">Target Merchant Tenant</label>
-            <select
-              value={simMerchantCode}
-              onChange={(e) => setSimMerchantCode(e.target.value)}
-              className="glass-input w-full rounded-xl py-2 px-3 text-white"
-            >
-              {merchantsList.length > 0 ? (
-                merchantsList.map((m) => (
-                  <option key={m._id} value={m.merchantCode} className="bg-slate-900">
-                    {m.name} ({m.merchantCode})
-                  </option>
-                ))
-              ) : (
-                <>
-                  <option value="MCH_ACME_001" className="bg-slate-900">Acme Corporation (MCH_ACME_001)</option>
-                  <option value="MCH_GLOBEX_002" className="bg-slate-900">Globex Retail (MCH_GLOBEX_002)</option>
-                </>
-              )}
-            </select>
+            {isMerchant && user?.merchant ? (
+              <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-cyan-300 font-semibold font-mono text-xs flex items-center justify-between">
+                <span>{user.merchant.name || 'Your Company'}</span>
+                <span className="bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded text-[11px]">
+                  {user.merchant.merchantCode}
+                </span>
+              </div>
+            ) : (
+              <select
+                value={simMerchantCode}
+                onChange={(e) => setSimMerchantCode(e.target.value)}
+                className="glass-input w-full rounded-xl py-2 px-3 text-white"
+              >
+                {merchantsList.length > 0 ? (
+                  merchantsList.map((m) => (
+                    <option key={m._id} value={m.merchantCode} className="bg-slate-900">
+                      {m.name} ({m.merchantCode})
+                    </option>
+                  ))
+                ) : (
+                  <>
+                    <option value="MCH_ACME_001" className="bg-slate-900">Acme Corporation (MCH_ACME_001)</option>
+                    <option value="MCH_GLOBEX_002" className="bg-slate-900">Globex Retail (MCH_GLOBEX_002)</option>
+                  </>
+                )}
+              </select>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -463,10 +480,16 @@ export const DashboardPage = () => {
                 onChange={(e) => setSimGateway(e.target.value)}
                 className="glass-input w-full rounded-xl py-2 px-3 text-white"
               >
-                <option value="STRIPE" className="bg-slate-900">Stripe</option>
-                <option value="RAZORPAY" className="bg-slate-900">Razorpay</option>
-                <option value="ADYEN" className="bg-slate-900">Adyen</option>
-                <option value="PAYPAL" className="bg-slate-900">PayPal</option>
+                {((isMerchant && user?.merchant?.configuration?.supportedGateways) || [
+                  'STRIPE',
+                  'RAZORPAY',
+                  'ADYEN',
+                  'PAYPAL',
+                ]).map((gw) => (
+                  <option key={gw} value={gw} className="bg-slate-900">
+                    {gw}
+                  </option>
+                ))}
               </select>
             </div>
 
