@@ -6,8 +6,10 @@ import {
   Plus,
   Search,
   CheckCircle2,
+  AlertTriangle,
   Eye,
   Check,
+  ShieldAlert,
 } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
@@ -103,10 +105,12 @@ export const MerchantsPage = () => {
     }
   };
 
-  const handleToggleStatus = async (merchant) => {
-    const nextStatus = merchant.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+  const handleUpdateStatus = async (merchantId, newStatus) => {
     try {
-      await merchantsApi.updateMerchantStatus(merchant._id, nextStatus);
+      await merchantsApi.updateMerchantStatus(merchantId, newStatus);
+      if (selectedMerchant && selectedMerchant._id === merchantId) {
+        setSelectedMerchant({ ...selectedMerchant, status: newStatus });
+      }
       fetchMerchants();
     } catch (err) {
       alert(`Failed to update status: ${err.message}`);
@@ -159,7 +163,7 @@ export const MerchantsPage = () => {
               <option value="" className="bg-slate-900">All Statuses</option>
               <option value="ACTIVE" className="bg-slate-900">Active Only</option>
               <option value="INACTIVE" className="bg-slate-900">Inactive Only</option>
-              <option value="SUSPENDED" className="bg-slate-900">Suspended</option>
+              <option value="SUSPENDED" className="bg-slate-900">Suspended Only</option>
             </select>
 
             <Button type="submit" variant="secondary" size="md">
@@ -230,13 +234,23 @@ export const MerchantsPage = () => {
                 </Button>
 
                 {isAdmin && (
-                  <Button
-                    variant={merchant.status === 'ACTIVE' ? 'outline' : 'primary'}
-                    size="sm"
-                    onClick={() => handleToggleStatus(merchant)}
-                  >
-                    {merchant.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <select
+                      value={merchant.status}
+                      onChange={(e) => handleUpdateStatus(merchant._id, e.target.value)}
+                      className={`text-xs py-1 px-2 rounded-lg border font-semibold outline-none cursor-pointer ${
+                        merchant.status === 'ACTIVE'
+                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                          : merchant.status === 'SUSPENDED'
+                          ? 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+                          : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                      }`}
+                    >
+                      <option value="ACTIVE" className="bg-slate-900 text-white">Active</option>
+                      <option value="INACTIVE" className="bg-slate-900 text-white">Inactive</option>
+                      <option value="SUSPENDED" className="bg-slate-900 text-white">Suspend</option>
+                    </select>
+                  </div>
                 )}
               </div>
             </Card>
@@ -260,10 +274,21 @@ export const MerchantsPage = () => {
               </div>
               <div>
                 <span className="text-slate-400">Account Status:</span>
-                <div className="mt-0.5">
+                <div className="mt-1 flex items-center gap-2">
                   <Badge variant={selectedMerchant.status} size="sm">
                     {selectedMerchant.status}
                   </Badge>
+                  {isAdmin && (
+                    <select
+                      value={selectedMerchant.status}
+                      onChange={(e) => handleUpdateStatus(selectedMerchant._id, e.target.value)}
+                      className="bg-slate-900 border border-white/20 text-xs rounded px-2 py-0.5 text-white"
+                    >
+                      <option value="ACTIVE">Set Active</option>
+                      <option value="INACTIVE">Set Inactive</option>
+                      <option value="SUSPENDED">Set Suspended</option>
+                    </select>
+                  )}
                 </div>
               </div>
             </div>
