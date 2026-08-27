@@ -101,33 +101,42 @@ export const LoginPage = () => {
             </Button>
           </form>
 
-          {/* Quick Demo Credentials Preset */}
+          {/* Quick Demo Credentials Presets */}
           <div className="mt-8 pt-6 border-t border-white/10">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                Demo Logins
+                Demo Role Logins
               </span>
               <span className="text-[10px] text-slate-500">Click to fill</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="grid grid-cols-3 gap-2 text-xs">
               <button
                 type="button"
                 onClick={() => handleQuickLogin('admin@payguard.io', 'Admin@123456')}
-                className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-cyan-500/30 text-left transition-all group"
+                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-cyan-500/30 text-left transition-all group"
               >
-                <div className="font-semibold text-slate-200 group-hover:text-cyan-300">Super Admin</div>
-                <div className="text-[10px] text-slate-400 truncate">admin@payguard.io</div>
+                <div className="font-semibold text-slate-200 group-hover:text-cyan-300 text-[11px]">Super Admin</div>
+                <div className="text-[9px] text-slate-400 truncate">Global Oversight</div>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleQuickLogin('support@payguard.io', 'Support@123456')}
-                className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-amber-500/30 text-left transition-all group"
+                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-amber-500/30 text-left transition-all group"
               >
-                <div className="font-semibold text-slate-200 group-hover:text-amber-300">Support Ops</div>
-                <div className="text-[10px] text-slate-400 truncate">support@payguard.io</div>
+                <div className="font-semibold text-slate-200 group-hover:text-amber-300 text-[11px]">Support Ops</div>
+                <div className="text-[9px] text-slate-400 truncate">Triage & Overrides</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleQuickLogin('merchant@acme.com', 'Merchant@123456')}
+                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-emerald-500/30 text-left transition-all group"
+              >
+                <div className="font-semibold text-slate-200 group-hover:text-emerald-300 text-[11px]">Merchant</div>
+                <div className="text-[9px] text-slate-400 truncate">Acme Tenant Only</div>
               </button>
             </div>
           </div>
@@ -142,3 +151,5 @@ export const LoginPage = () => {
     </div>
   );
 };
+
+export default LoginPage;

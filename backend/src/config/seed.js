@@ -49,20 +49,31 @@ const SEED_ACCOUNTS = [
     role: USER_ROLES.SUPPORT,
     status: USER_STATUS.ACTIVE,
   },
+  {
+    name: 'Acme Merchant Manager',
+    email: 'merchant@acme.com',
+    password: 'Merchant@123456',
+    role: USER_ROLES.MERCHANT,
+    status: USER_STATUS.ACTIVE,
+    merchantCode: 'MCH_ACME_001',
+  },
 ];
 
 /**
- * Database Seeder: Provisions default Admin, Support, and Demo Merchants
+ * Database Seeder: Provisions default Admin, Support, Merchant and Demo Tenants
  */
 const seedSuperAdmin = async () => {
   try {
+    const merchantMap = {};
+
     // 1. Seed Demo Merchants
     for (const mch of SEED_MERCHANTS) {
-      const existingMch = await Merchant.findOne({ merchantCode: mch.merchantCode });
+      let existingMch = await Merchant.findOne({ merchantCode: mch.merchantCode });
       if (!existingMch) {
-        await Merchant.create(mch);
+        existingMch = await Merchant.create(mch);
         logger.info(`🎉 Provisioned demo merchant: ${mch.merchantCode} (${mch.name})`);
       }
+      merchantMap[mch.merchantCode] = existingMch._id;
     }
 
     // 2. Seed Demo Users
@@ -70,12 +81,15 @@ const seedSuperAdmin = async () => {
       const existing = await User.findOne({ email: account.email, isDeleted: false });
       if (!existing) {
         const passwordHash = await hashPassword(account.password);
+        const merchantId = account.merchantCode ? merchantMap[account.merchantCode] : null;
+
         await User.create({
           name: account.name,
           email: account.email,
           passwordHash,
           role: account.role,
           status: account.status,
+          merchant: merchantId,
           lastPasswordChange: new Date(),
         });
         logger.info(`🎉 Provisioned demo account: ${account.email} (${account.role})`);
