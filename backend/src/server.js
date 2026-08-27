@@ -1,6 +1,7 @@
 const app = require('./app');
 const env = require('./config/env');
 const { connectDB, disconnectDB } = require('./config/db');
+const { seedSuperAdmin } = require('./config/seed');
 const logger = require('./utils/logger');
 
 let server;
@@ -10,8 +11,9 @@ let server;
  */
 const startServer = async () => {
   try {
-    // 1. Establish Database Connection
+    // 1. Establish Database Connection & Auto-Seed Demo Accounts
     await connectDB();
+    await seedSuperAdmin();
 
     // 2. Start HTTP Server
     server = app.listen(env.PORT, () => {
