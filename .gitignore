@@ -32,3 +32,8 @@ env/
 Thumbs.db
 .vscode/
 .idea/
+
+# Internal Project Guides & Milestone Summaries (Keep README.md only)
+PAYGUARD_*.md
+*_SUMMARY.md
+PRODUCTION_DEPLOYMENT_*.md
