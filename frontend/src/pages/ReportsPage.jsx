@@ -76,8 +76,13 @@ export const ReportsPage = () => {
 
   const handleDownload = async (report) => {
     try {
-      const blob = await reportsApi.downloadReport(report._id);
-      const url = window.URL.createObjectURL(new Blob([blob]));
+      const data = await reportsApi.downloadReport(report._id);
+      const mimeType =
+        report.format === 'XLSX'
+          ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+          : 'text/csv;charset=utf-8;';
+      const blob = new Blob([data], { type: mimeType });
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       const ext = report.format === 'XLSX' ? 'xlsx' : 'csv';
@@ -85,6 +90,7 @@ export const ReportsPage = () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
+      setTimeout(() => window.URL.revokeObjectURL(url), 2000);
     } catch (err) {
       alert(`Download failed: ${err.message}`);
     }

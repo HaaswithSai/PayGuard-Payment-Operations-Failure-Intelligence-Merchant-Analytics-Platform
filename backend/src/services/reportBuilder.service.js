@@ -2,7 +2,7 @@ const { Payment, FailureClassification, Merchant, AuditLog } = require('../model
 const { REPORT_TYPES, PAYMENT_STATUS } = require('../constants/enums');
 const { parseDateRange, calculatePercentage } = require('../utils/analytics.utils');
 const { jsonToCsv } = require('../utils/csv.utils');
-const { jsonToExcelXml } = require('../utils/xlsx.utils');
+const { jsonToExcelBuffer } = require('../utils/xlsx.utils');
 const AppError = require('../utils/AppError');
 
 /**
@@ -16,7 +16,7 @@ class ReportBuilderService {
    * @param {string} params.format (CSV or XLSX)
    * @param {object} params.filtersUsed
    * @param {object} params.actorUser
-   * @returns {Promise<{ content: string, rowCount: number, filename: string }>}
+   * @returns {Promise<{ content: string|Buffer, rowCount: number, filename: string }>}
    */
   async buildReport({ reportType, format, filtersUsed = {}, actorUser }) {
     const { start, end } = parseDateRange(filtersUsed);
@@ -70,13 +70,13 @@ class ReportBuilderService {
     }
 
     // Serialize to requested format
-    let content = '';
+    let content;
     const ext = format === 'XLSX' ? 'xlsx' : 'csv';
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `${title}_${timestamp}.${ext}`;
 
     if (format === 'XLSX') {
-      content = jsonToExcelXml(rows, columns, title.replace(/_/g, ' '));
+      content = jsonToExcelBuffer(rows, columns, title.replace(/_/g, ' '));
     } else {
       content = jsonToCsv(rows, columns);
     }

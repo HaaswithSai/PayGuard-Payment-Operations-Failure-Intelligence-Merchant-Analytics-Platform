@@ -39,7 +39,11 @@ class StorageService {
       this.ensureLocalStorageDir();
       const filePath = path.join(LOCAL_STORAGE_DIR, filename);
 
-      await fs.promises.writeFile(filePath, content, 'utf8');
+      if (Buffer.isBuffer(content)) {
+        await fs.promises.writeFile(filePath, content);
+      } else {
+        await fs.promises.writeFile(filePath, content, 'utf8');
+      }
       const stats = await fs.promises.stat(filePath);
 
       const relativeLocation = path.relative(path.join(__dirname, '..', '..'), filePath).replace(/\\/g, '/');
@@ -55,7 +59,7 @@ class StorageService {
     logger.info(`[StorageService] Dispatching file ${filename} to ${storageType} storage driver.`);
     return {
       fileLocation: `${storageType.toLowerCase()}://payguard-reports/${filename}`,
-      fileSizeBytes: Buffer.byteLength(content, 'utf8'),
+      fileSizeBytes: Buffer.isBuffer(content) ? content.length : Buffer.byteLength(content, 'utf8'),
       storageType,
     };
   }
@@ -111,7 +115,7 @@ class StorageService {
       case REPORT_FORMATS.CSV:
         return 'text/csv; charset=utf-8';
       case REPORT_FORMATS.XLSX:
-        return 'application/vnd.ms-excel; charset=utf-8';
+        return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
       default:
         return 'application/octet-stream';
     }
