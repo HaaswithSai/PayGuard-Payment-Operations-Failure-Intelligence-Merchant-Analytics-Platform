@@ -1,8 +1,38 @@
-const { User } = require('../models');
+const { User, Merchant } = require('../models');
 const { hashPassword } = require('../utils/password');
 const { connectDB } = require('./db');
-const { USER_ROLES, USER_STATUS } = require('../constants/enums');
+const { USER_ROLES, USER_STATUS, MERCHANT_STATUS, PAYMENT_GATEWAYS } = require('../constants/enums');
 const logger = require('../utils/logger');
+
+const SEED_MERCHANTS = [
+  {
+    merchantCode: 'MCH_ACME_001',
+    name: 'Acme Corporation',
+    contactEmail: 'billing@acme.com',
+    status: MERCHANT_STATUS.ACTIVE,
+    configuration: {
+      supportedGateways: [
+        PAYMENT_GATEWAYS.STRIPE,
+        PAYMENT_GATEWAYS.RAZORPAY,
+        PAYMENT_GATEWAYS.ADYEN,
+        PAYMENT_GATEWAYS.PAYPAL,
+      ],
+      defaultCurrency: 'USD',
+      webhookSecret: 'whsec_simulated_test_secret_123',
+    },
+  },
+  {
+    merchantCode: 'MCH_GLOBEX_002',
+    name: 'Globex Retail International',
+    contactEmail: 'finance@globex.com',
+    status: MERCHANT_STATUS.ACTIVE,
+    configuration: {
+      supportedGateways: [PAYMENT_GATEWAYS.STRIPE, PAYMENT_GATEWAYS.ADYEN],
+      defaultCurrency: 'USD',
+      webhookSecret: 'whsec_simulated_test_secret_123',
+    },
+  },
+];
 
 const SEED_ACCOUNTS = [
   {
@@ -22,10 +52,20 @@ const SEED_ACCOUNTS = [
 ];
 
 /**
- * Database Seeder: Provisions default Admin & Support accounts if none exist
+ * Database Seeder: Provisions default Admin, Support, and Demo Merchants
  */
 const seedSuperAdmin = async () => {
   try {
+    // 1. Seed Demo Merchants
+    for (const mch of SEED_MERCHANTS) {
+      const existingMch = await Merchant.findOne({ merchantCode: mch.merchantCode });
+      if (!existingMch) {
+        await Merchant.create(mch);
+        logger.info(`🎉 Provisioned demo merchant: ${mch.merchantCode} (${mch.name})`);
+      }
+    }
+
+    // 2. Seed Demo Users
     for (const account of SEED_ACCOUNTS) {
       const existing = await User.findOne({ email: account.email, isDeleted: false });
       if (!existing) {
@@ -54,4 +94,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { seedSuperAdmin, SEED_ACCOUNTS };
+module.exports = { seedSuperAdmin, SEED_ACCOUNTS, SEED_MERCHANTS };
