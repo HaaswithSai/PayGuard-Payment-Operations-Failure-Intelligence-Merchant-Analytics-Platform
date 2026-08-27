@@ -19,6 +19,41 @@ const login = asyncHandler(async (req, res) => {
 });
 
 /**
+ * @route   POST /api/v1/auth/register-merchant
+ * @desc    Public Self-Service Merchant Registration
+ * @access  Public
+ */
+const registerMerchant = asyncHandler(async (req, res) => {
+  const {
+    name,
+    email,
+    password,
+    merchantName,
+    merchantCode,
+    supportedGateways,
+    defaultCurrency,
+  } = req.body;
+
+  const { user, merchant, token } = await authService.registerMerchantAccount({
+    name,
+    email,
+    password,
+    merchantName,
+    merchantCode,
+    supportedGateways,
+    defaultCurrency,
+  });
+
+  res.status(201).json({
+    success: true,
+    message: 'Merchant registered and authenticated successfully',
+    token,
+    user,
+    merchant,
+  });
+});
+
+/**
  * @route   POST /api/v1/auth/register
  * @desc    Register / Create new user (Admin / Onboarding)
  * @access  Public (or Protected Admin)
@@ -92,6 +127,7 @@ const changePassword = asyncHandler(async (req, res) => {
 module.exports = {
   login,
   register,
+  registerMerchant,
   getMe,
   logout,
   changePassword,

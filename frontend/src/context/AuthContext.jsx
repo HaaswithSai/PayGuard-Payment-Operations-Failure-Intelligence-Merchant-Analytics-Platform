@@ -54,6 +54,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const registerMerchant = async (merchantData) => {
+    setIsLoading(true);
+    try {
+      const res = await authApi.registerMerchant(merchantData);
+      const { token: receivedToken, user: receivedUser } = res;
+
+      localStorage.setItem('payguard_token', receivedToken);
+      localStorage.setItem('payguard_user', JSON.stringify(receivedUser));
+
+      setToken(receivedToken);
+      setUser(receivedUser);
+      setIsLoading(false);
+      return { success: true, user: receivedUser };
+    } catch (error) {
+      setIsLoading(false);
+      throw error;
+    }
+  };
+
   const logout = async () => {
     try {
       if (token) {
@@ -78,6 +97,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!token && !!user,
     isLoading,
     login,
+    registerMerchant,
     logout,
     hasRole,
     isAdmin: user?.role === 'ADMIN',

@@ -101,8 +101,16 @@ export const LoginPage = () => {
             </Button>
           </form>
 
+          {/* Public Self-Service Signup Link */}
+          <div className="mt-4 text-center text-xs text-slate-400">
+            Onboarding a new business?{' '}
+            <a href="/register" className="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors">
+              Register as Merchant →
+            </a>
+          </div>
+
           {/* Quick Demo Credentials Presets */}
-          <div className="mt-8 pt-6 border-t border-white/10">
+          <div className="mt-6 pt-5 border-t border-white/10">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-cyan-400" />

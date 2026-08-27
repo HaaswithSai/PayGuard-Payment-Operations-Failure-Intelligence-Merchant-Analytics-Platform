@@ -11,8 +11,9 @@ const {
 
 const router = express.Router();
 
-// Public Authentication Endpoint
+// Public Authentication Endpoints
 router.post('/login', validateLogin, authController.login);
+router.post('/register-merchant', authController.registerMerchant);
 
 // Protected Admin-Only User Provisioning
 router.post('/register', protect, restrictTo(USER_ROLES.ADMIN), validateRegister, authController.register);

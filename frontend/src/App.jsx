@@ -5,6 +5,7 @@ import { ProtectedRoute } from './routes/ProtectedRoute';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 
 import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { MerchantsPage } from './pages/MerchantsPage';
 import { PaymentsPage } from './pages/PaymentsPage';
@@ -18,8 +19,9 @@ export const App = () => {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Public Route */}
+          {/* Public Routes */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
 
           {/* Protected Dashboard Shell */}
           <Route

@@ -152,8 +152,76 @@ const changePassword = async ({ userId, currentPassword, newPassword }) => {
     merchant: user.merchant,
   });
 
+/**
+ * Service: Public Self-Service Merchant Registration
+ */
+const registerMerchantAccount = async ({
+  name,
+  email,
+  password,
+  merchantName,
+  merchantCode,
+  supportedGateways,
+  defaultCurrency,
+}) => {
+  // 1. Check if email already exists
+  const existingUser = await User.findOne({ email: email.toLowerCase(), isDeleted: false });
+  if (existingUser) {
+    throw new AppError(`User with email '${email}' already exists`, 409, 'DUPLICATE_EMAIL');
+  }
+
+  // 2. Format / validate merchantCode
+  const safeName = (merchantName || name || 'MCH').replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 8);
+  let code = (merchantCode ? merchantCode.trim().toUpperCase() : `MCH_${safeName}_${Math.floor(100 + Math.random() * 900)}`);
+  
+  const existingMerchant = await Merchant.findOne({ merchantCode: code, isDeleted: false });
+  if (existingMerchant) {
+    code = `${code}_${Math.floor(100 + Math.random() * 900)}`;
+  }
+
+  // 3. Create Merchant Tenant Record
+  const newMerchant = await Merchant.create({
+    merchantCode: code,
+    name: merchantName || name,
+    contactEmail: email.toLowerCase(),
+    status: 'ACTIVE',
+    configuration: {
+      supportedGateways: (supportedGateways && supportedGateways.length > 0)
+        ? supportedGateways
+        : ['STRIPE', 'RAZORPAY', 'ADYEN', 'PAYPAL'],
+      defaultCurrency: (defaultCurrency || 'USD').toUpperCase(),
+      webhookSecret: `whsec_simulated_test_secret_123`,
+      retryPolicy: {
+        maxRetries: 3,
+        backoffFactorMs: 1000,
+        timeoutMs: 5000,
+      },
+    },
+  });
+
+  // 4. Hash password & create user
+  const passwordHash = await hashPassword(password);
+  const user = await User.create({
+    name: name || merchantName,
+    email: email.toLowerCase(),
+    passwordHash,
+    role: USER_ROLES.MERCHANT,
+    status: USER_STATUS.ACTIVE,
+    merchant: newMerchant._id,
+    lastPasswordChange: new Date(),
+  });
+
+  // 5. Generate JWT token
+  const token = signToken({
+    id: user._id,
+    role: user.role,
+    email: user.email,
+    merchant: user.merchant,
+  });
+
   return {
     user: user.toJSON(),
+    merchant: newMerchant.toJSON(),
     token,
   };
 };
@@ -161,6 +229,8 @@ const changePassword = async ({ userId, currentPassword, newPassword }) => {
 module.exports = {
   loginUser,
   createUser,
+  registerMerchantAccount,
   getUserProfile,
   changePassword,
 };
+
