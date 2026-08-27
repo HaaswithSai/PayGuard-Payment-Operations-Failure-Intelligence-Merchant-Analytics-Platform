@@ -1,4 +1,4 @@
-# 🛡️ PayGuard — Enterprise Payment Operations & Analytics Platform
+# 🛡️ PayGuard: Payment Operations, Failure Intelligence & Merchant Analytics Platform
 
 > **Real-Time Payment Operations, Webhook Ingestion, ML Failure Intelligence, and Multi-Tenant Analytics Engine**
 
