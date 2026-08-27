@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { analyticsApi } from '../api/analytics.api';
 import { webhooksApi } from '../api/webhooks.api';
+import { merchantsApi } from '../api/merchants.api';
 import {
   DollarSign,
   CheckCircle2,
@@ -10,9 +11,8 @@ import {
   TrendingUp,
   Activity,
   Zap,
-  ArrowUpRight,
   RefreshCw,
-  Plus,
+  Filter,
 } from 'lucide-react';
 import { StatCard } from '../components/ui/StatCard';
 import { Card } from '../components/ui/Card';
@@ -41,11 +41,14 @@ export const DashboardPage = () => {
   const [trends, setTrends] = useState([]);
   const [categories, setCategories] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
+  const [merchantsList, setMerchantsList] = useState([]);
+  const [selectedMerchantId, setSelectedMerchantId] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Webhook Simulator Modal State
   const [isSimulateOpen, setIsSimulateOpen] = useState(false);
+  const [simMerchantCode, setSimMerchantCode] = useState('MCH_ACME_001');
   const [simGateway, setSimGateway] = useState('STRIPE');
   const [simStatus, setSimStatus] = useState('FAILED');
   const [simAmount, setSimAmount] = useState('150.00');
@@ -53,13 +56,23 @@ export const DashboardPage = () => {
   const [simLoading, setSimLoading] = useState(false);
   const [simMessage, setSimMessage] = useState('');
 
-  const fetchDashboardData = async () => {
+  const fetchMerchants = async () => {
     try {
+      const res = await merchantsApi.getMerchants();
+      setMerchantsList(res.merchants || []);
+    } catch (e) {
+      console.warn('Could not load merchant list:', e);
+    }
+  };
+
+  const fetchDashboardData = async (mId = selectedMerchantId) => {
+    try {
+      const params = mId ? { merchantId: mId } : {};
       const [summaryRes, trendRes, categoryRes, activityRes] = await Promise.all([
-        analyticsApi.getSummary().catch(() => ({ data: {} })),
-        analyticsApi.getPaymentsTrend({ groupBy: 'day' }).catch(() => ({ data: { trend: [] } })),
-        analyticsApi.getFailuresByCategory().catch(() => ({ data: { breakdown: [] } })),
-        analyticsApi.getRecentActivity({ limit: 8 }).catch(() => ({ data: { activity: [] } })),
+        analyticsApi.getSummary(params).catch(() => ({ data: {} })),
+        analyticsApi.getPaymentsTrend({ groupBy: 'day', ...params }).catch(() => ({ data: { trend: [] } })),
+        analyticsApi.getFailuresByCategory(params).catch(() => ({ data: { breakdown: [] } })),
+        analyticsApi.getRecentActivity({ limit: 8, ...params }).catch(() => ({ data: { activity: [] } })),
       ]);
 
       setSummary(summaryRes.data || {});
@@ -75,8 +88,16 @@ export const DashboardPage = () => {
   };
 
   useEffect(() => {
+    fetchMerchants();
     fetchDashboardData();
   }, []);
+
+  const handleMerchantChange = (e) => {
+    const newId = e.target.value;
+    setSelectedMerchantId(newId);
+    setIsLoading(true);
+    fetchDashboardData(newId);
+  };
 
   const handleRefresh = () => {
     setIsRefreshing(true);
@@ -90,6 +111,7 @@ export const DashboardPage = () => {
 
     try {
       const res = await webhooksApi.simulateWebhook({
+        merchantCode: simMerchantCode,
         gateway: simGateway,
         status: simStatus,
         amount: parseFloat(simAmount) || 100,
@@ -97,7 +119,7 @@ export const DashboardPage = () => {
         rawFailureReason: simStatus === 'FAILED' ? simFailure : null,
       });
 
-      setSimMessage(`Success! Payment ${res.payment?.paymentId || 'created'} ingested & queued for classification.`);
+      setSimMessage(`Success! Payment ${res.payment?.paymentId || 'created'} ingested for ${simMerchantCode}.`);
       setTimeout(() => {
         setIsSimulateOpen(false);
         setSimMessage('');
@@ -112,12 +134,11 @@ export const DashboardPage = () => {
 
   const metrics = summary?.metrics || {};
   const merchants = summary?.merchants;
-
   const COLORS = ['#38bdf8', '#818cf8', '#f43f5e', '#fbbf24', '#34d399', '#c084fc'];
 
   return (
     <div className="space-y-6">
-      {/* Top Banner: Welcome & Quick Action */}
+      {/* Top Banner: Welcome & Controls */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
@@ -131,7 +152,26 @@ export const DashboardPage = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Merchant Scope Selector (Admin/Support) */}
+          {!isMerchant && merchantsList.length > 0 && (
+            <div className="flex items-center gap-1.5 bg-slate-900/60 border border-white/10 px-2.5 py-1.5 rounded-xl">
+              <Filter className="w-3.5 h-3.5 text-cyan-400" />
+              <select
+                value={selectedMerchantId}
+                onChange={handleMerchantChange}
+                className="bg-transparent text-xs text-white outline-none cursor-pointer"
+              >
+                <option value="" className="bg-slate-900 text-white">All Merchants (Global)</option>
+                {merchantsList.map((m) => (
+                  <option key={m._id} value={m._id} className="bg-slate-900 text-white">
+                    {m.name} ({m.merchantCode})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <Button
             variant="secondary"
             size="sm"
@@ -392,6 +432,29 @@ export const DashboardPage = () => {
             </div>
           )}
 
+          {/* Target Merchant Selector */}
+          <div>
+            <label className="block text-slate-400 font-medium mb-1">Target Merchant Tenant</label>
+            <select
+              value={simMerchantCode}
+              onChange={(e) => setSimMerchantCode(e.target.value)}
+              className="glass-input w-full rounded-xl py-2 px-3 text-white"
+            >
+              {merchantsList.length > 0 ? (
+                merchantsList.map((m) => (
+                  <option key={m._id} value={m.merchantCode} className="bg-slate-900">
+                    {m.name} ({m.merchantCode})
+                  </option>
+                ))
+              ) : (
+                <>
+                  <option value="MCH_ACME_001" className="bg-slate-900">Acme Corporation (MCH_ACME_001)</option>
+                  <option value="MCH_GLOBEX_002" className="bg-slate-900">Globex Retail (MCH_GLOBEX_002)</option>
+                </>
+              )}
+            </select>
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-slate-400 font-medium mb-1">Gateway</label>
@@ -481,3 +544,5 @@ export const DashboardPage = () => {
     </div>
   );
 };
+
+export default DashboardPage;
